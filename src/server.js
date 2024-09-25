@@ -13,6 +13,10 @@ app.use(bodyParser.json());
 
 app.use(itemRoutes);
 
+app.get("/", (req, res) => {
+  response(200, "API v1 ready to go", "Success", res);
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
