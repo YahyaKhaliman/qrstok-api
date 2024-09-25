@@ -66,6 +66,15 @@ router.get("/items", async (req, res) => {
   }
 });
 
+router.get("/items/total-stock", async (req, res) => {
+  try {
+    const totalStock = await itemModel.getTotalStock();
+    res.json({ totalStock });
+  } catch (err) {
+    console.error("Error getting total stock:", err);
+    res.status(500).send(err.message);
+  }
+});
 // Endpoint untuk menghasilkan QR code dari secretCode item
 // router.get("/items/s/qrcode/:secretCode", async (req, res) => {
 //   try {

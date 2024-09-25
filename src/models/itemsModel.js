@@ -41,6 +41,16 @@ const getItemById = (id) => {
   });
 };
 
+const getTotalStock = () => {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT SUM(stock) AS totalStock FROM items"; // Pastikan nama tabel dan kolom sesuai
+    connection.query(sql, (err, results) => {
+      if (err) return reject(err);
+      resolve(results[0].totalStock); // Mengembalikan total stock
+    });
+  });
+};
+
 // // Fungsi untuk memperbarui item
 // const updateItem = (id, updates) => {
 //   return new Promise((resolve, reject) => {
@@ -84,6 +94,7 @@ module.exports = {
   addItem,
   getAllItems,
   getItemById,
+  getTotalStock,
   // updateItem,
   // deleteItem,
   getItemBySecretCode,
