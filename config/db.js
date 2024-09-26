@@ -1,10 +1,10 @@
 const mysql = require("mysql2");
 
 // const connection = mysql.createConnection({
-//   host: "localhost",
-//   user: "root",
-//   password: "Backend_2023",
-//   database: "db_monitoring_qrcode",
+//   host: process.env.local_host,
+//   user: process.env.local_user,
+//   password: process.env.local_password,
+//   database: process.env.local_database,
 // });
 const connection = mysql.createConnection({
   host: process.env.host,
