@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 app.use(itemRoutes);
 
 app.get("/", (req, res) => {
-  response(200, "API v1 ready to go", "Success", res);
+  response(200, "API v1 ready", "Success", res);
 });
 
 // Error handling middleware
