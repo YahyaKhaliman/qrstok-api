@@ -11,7 +11,7 @@ const addItem = (name, type, stock) => {
   const secretCode = generateSecretCode(); // Menggunakan fungsi untuk menghasilkan secretCode
   return new Promise((resolve, reject) => {
     const sql =
-      "INSERT INTO items (name, type, stock, secretCode) VALUES (?, ?, ?, ?)";
+      "INSERT INTO items (name, type, stock, secretCode, qrCode) VALUES (?, ?, ?, ?, ?)";
     connection.query(
       sql,
       [name, type, stock, secretCode, qrCode],
