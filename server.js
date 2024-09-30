@@ -13,6 +13,13 @@ app.use(bodyParser.json());
 
 app.use(itemRoutes);
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "API qrstok-api ready",
+  });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
