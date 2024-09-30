@@ -9,19 +9,17 @@ const addItem = async (req, res) => {
   try {
     console.log("Received data:", req.body);
 
-    const item = await itemModel.addItem(
-      req.body.name,
-      req.body.type,
-      req.body.stock
-    );
-
-    const qrData = `https://qrstok-api.my.id/items/s/${item.secretCode}`;
+    // Generate a secret code and QR code path here
+    const secretCode = itemModel.generateSecretCode();
+    const qrData = `https://qrstok-api.my.id/items/s/${secretCode}`;
     const dir = path.join(__dirname, "../public/qrcodes");
 
+    // Ensure the directory exists
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir);
     }
 
+    // Generate QR Code and save it as a file
     QRCode.toDataURL(qrData, async (err, url) => {
       if (err) {
         console.error("Error generating QR Code:", err);
@@ -29,33 +27,28 @@ const addItem = async (req, res) => {
       }
 
       const base64Data = url.replace(/^data:image\/png;base64,/, "");
-      const filePath = path.join(dir, `${item.secretCode}.png`);
+      const filePath = path.join(dir, `${secretCode}.png`);
 
+      // Save the QR code file
       fs.writeFile(filePath, base64Data, "base64", async (err) => {
         if (err) {
           console.error("Error saving QR Code:", err);
           return res.status(500).send(err.message);
         }
 
-        try {
-          const qrCodePath = `/public/qrcodes/${item.secretCode}.png`;
-          await itemModel.updateQrCode(item.id, qrCodePath);
+        // Create a relative path for the QR code including 'public'
+        const relativePath = `public/qrcodes/${secretCode}.png`;
 
-          res.status(201).json({
-            status: "success",
-            message: "Item added and QR Code created successfully",
-            item: {
-              id: item.id,
-              name: item.name,
-              type: item.type,
-              stock: item.stock,
-              qrCode: qrCodePath,
-            },
-          });
-        } catch (dbError) {
-          console.error("Error updating item with QR Code path:", dbError);
-          res.status(500).send(dbError.message);
-        }
+        // Now call the model to add the item with the relative QR code path
+        const itemResponse = await itemModel.addItem(
+          req.body.name,
+          req.body.type,
+          req.body.stock,
+          relativePath // Pass the relative QR code file path
+        );
+
+        // Send the response from the model
+        res.status(201).json(itemResponse);
       });
     });
   } catch (err) {
@@ -74,17 +67,6 @@ const getAllItems = async (req, res) => {
   }
 };
 
-// Function to get total stock
-const getTotalStock = async (req, res) => {
-  try {
-    const totalStock = await itemModel.getTotalStock();
-    res.json({ totalStock });
-  } catch (err) {
-    console.error("Error getting total stock:", err);
-    res.status(500).send(err.message);
-  }
-};
-
 // Function to get item by secret code
 const getItemBySecretCode = async (req, res) => {
   try {
@@ -94,6 +76,16 @@ const getItemBySecretCode = async (req, res) => {
     res.json(item);
   } catch (err) {
     console.error("Error fetching item by secretCode:", err);
+    res.status(500).send(err.message);
+  }
+};
+
+// Function to get total stock
+const getTotalStock = async (req, res) => {
+  try {
+    const totalStock = await itemModel.getTotalStock();
+    res.json({ totalStock });
+  } catch (err) {
     res.status(500).send(err.message);
   }
 };

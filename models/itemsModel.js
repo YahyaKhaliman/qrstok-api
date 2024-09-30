@@ -7,25 +7,31 @@ const generateSecretCode = () => {
 };
 
 // Fungsi untuk menambah item
-const addItem = async (name, type, stock) => {
-  const secretCode = generateSecretCode(); // Menggunakan fungsi untuk menghasilkan secretCode
-  const qrCode = ""; // Awalnya set sebagai string kosong
+const addItem = (name, type, stock, qrCode) => {
+  const secretCode = generateSecretCode();
   return new Promise((resolve, reject) => {
     const sql =
       "INSERT INTO items (name, type, stock, secretCode, qrCode) VALUES (?, ?, ?, ?, ?)";
+
     connection.query(
       sql,
       [name, type, stock, secretCode, qrCode],
       (err, results) => {
         if (err) return reject(err);
-        resolve({
-          id: results.insertId,
-          name,
-          type,
-          stock,
-          secretCode,
-          qrCode, // QR code masih kosong saat ini
-        });
+
+        const formatResults = {
+          status: "success",
+          message: "Item added successfully",
+          data: {
+            id: results.insertId,
+            name,
+            type,
+            stock,
+            secretCode,
+            qrCode,
+          },
+        };
+        resolve(formatResults);
       }
     );
   });
@@ -41,38 +47,51 @@ const getAllItems = () => {
       const formatResults = {
         status: "success",
         message: "list all items",
-        data: results.map((items) => ({
-          id: items.id,
-          name: items.name,
-          type: items.type,
-          stock: items.stock,
-          secretCode: items.secretCode,
+        data: results.map((item) => ({
+          id: item.id,
+          name: item.name,
+          type: item.type,
+          stock: item.stock,
+          secretCode: item.secretCode,
+          qrCode: item.qrCode,
         })),
       };
-
       resolve(formatResults);
     });
   });
 };
 
 // Fungsi untuk mendapatkan item berdasarkan ID
-const getItemById = (id) => {
+const getItemBySecretCode = (secretCode) => {
   return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM items WHERE id = ?";
-    connection.query(sql, [id], (err, results) => {
+    const sql = "SELECT * FROM items WHERE secretCode = ?";
+    connection.query(sql, [secretCode], (err, results) => {
       if (err) return reject(err);
       if (results.length === 0) return resolve(null);
-      resolve(results[0]);
+
+      const item = {
+        status: "success",
+        message: "Item found",
+        data: {
+          id: results[0].id,
+          name: results[0].name,
+          type: results[0].type,
+          stock: results[0].stock,
+          secretCode: results[0].secretCode,
+          qrCode: results[0].qrCode,
+        },
+      };
+      resolve(item);
     });
   });
 };
 
 const getTotalStock = () => {
   return new Promise((resolve, reject) => {
-    const sql = "SELECT SUM(stock) AS totalStock FROM items"; // Pastikan nama tabel dan kolom sesuai
+    const sql = "SELECT SUM(stock) AS totalStock FROM items";
     connection.query(sql, (err, results) => {
       if (err) return reject(err);
-      resolve(results[0].totalStock); // Mengembalikan total stock
+      resolve(results[0].totalStock);
     });
   });
 };
@@ -105,22 +124,12 @@ const getTotalStock = () => {
 //   });
 // };
 
-const getItemBySecretCode = (secretCode) => {
-  return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM items WHERE secretCode = ?";
-    connection.query(sql, [secretCode], (err, results) => {
-      if (err) return reject(err);
-      if (results.length === 0) return resolve(null);
-      resolve(results[0]);
-    });
-  });
-};
-
 module.exports = {
   addItem,
   getAllItems,
   getItemById,
   getTotalStock,
+  generateSecretCode,
   // updateItem,
   // deleteItem,
   getItemBySecretCode,
