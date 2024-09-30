@@ -12,10 +12,21 @@ const addItem = (name, type, stock) => {
   return new Promise((resolve, reject) => {
     const sql =
       "INSERT INTO items (name, type, stock, secretCode) VALUES (?, ?, ?, ?)";
-    connection.query(sql, [name, type, stock, secretCode], (err, results) => {
-      if (err) return reject(err);
-      resolve({ id: results.insertId, name, type, stock, secretCode });
-    });
+    connection.query(
+      sql,
+      [name, type, stock, secretCode, qrCode],
+      (err, results) => {
+        if (err) return reject(err);
+        resolve({
+          id: results.insertId,
+          name,
+          type,
+          stock,
+          secretCode,
+          qrCode,
+        });
+      }
+    );
   });
 };
 
