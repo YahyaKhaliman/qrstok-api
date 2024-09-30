@@ -7,8 +7,9 @@ const generateSecretCode = () => {
 };
 
 // Fungsi untuk menambah item
-const addItem = (name, type, stock) => {
+const addItem = async (name, type, stock) => {
   const secretCode = generateSecretCode(); // Menggunakan fungsi untuk menghasilkan secretCode
+  const qrCode = ""; // Awalnya set sebagai string kosong
   return new Promise((resolve, reject) => {
     const sql =
       "INSERT INTO items (name, type, stock, secretCode, qrCode) VALUES (?, ?, ?, ?, ?)";
@@ -23,7 +24,7 @@ const addItem = (name, type, stock) => {
           type,
           stock,
           secretCode,
-          qrCode,
+          qrCode, // QR code masih kosong saat ini
         });
       }
     );
