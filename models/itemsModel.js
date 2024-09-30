@@ -1,3 +1,4 @@
+const { stat } = require("fs");
 const connection = require("../config/db");
 
 // Fungsi untuk menghasilkan secretCode 9 digit
@@ -24,7 +25,20 @@ const getAllItems = () => {
     const sql = "SELECT * FROM items";
     connection.query(sql, (err, results) => {
       if (err) return reject(err);
-      resolve(results);
+
+      const formatResults = {
+        status: "success",
+        message: "list all items",
+        data: results.map((items) => ({
+          id: items.id,
+          name: items.name,
+          type: items.type,
+          stock: items.stock,
+          secretCode: items.secretCode,
+        })),
+      };
+
+      resolve(formatResults);
     });
   });
 };
