@@ -8,6 +8,8 @@ const itemModel = require("../models/itemsModel");
 const addItem = async (req, res) => {
   try {
     console.log("Received data:", req.body);
+
+    // Menambahkan item ke dalam database
     const item = await itemModel.addItem(
       req.body.name,
       req.body.type,
@@ -17,10 +19,12 @@ const addItem = async (req, res) => {
     const qrData = `https://qrstok-api.my.id/items/s/${item.secretCode}`;
     const dir = path.join(__dirname, "../public/qrcodes");
 
+    // Memeriksa apakah direktori untuk menyimpan QR Code ada, jika tidak buat
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir);
     }
 
+    // Membuat QR Code
     QRCode.toDataURL(qrData, (err, url) => {
       if (err) {
         console.error("Error generating QR Code:", err);
@@ -30,17 +34,29 @@ const addItem = async (req, res) => {
       const base64Data = url.replace(/^data:image\/png;base64,/, "");
       const filePath = path.join(dir, `${item.secretCode}.png`);
 
-      fs.writeFile(filePath, base64Data, "base64", (err) => {
+      // Menyimpan QR Code sebagai file PNG
+      fs.writeFile(filePath, base64Data, "base64", async (err) => {
         if (err) {
           console.error("Error saving QR Code:", err);
           return res.status(500).send(err.message);
         }
 
-        res.status(201).json({
-          item,
-          message: "QR Code created and saved",
-          filePath,
-        });
+        try {
+          // Setelah QR Code berhasil disimpan, update item di database untuk menyimpan path qrCode
+          const qrCodePath = `/public/qrcodes/${item.secretCode}.png`;
+
+          // Update database dengan path QR Code
+          await itemModel.updateQrCode(item.id, qrCodePath);
+
+          res.status(201).json({
+            item,
+            message: "QR Code created, saved, and path stored in database",
+            qrCodePath,
+          });
+        } catch (dbError) {
+          console.error("Error updating item with QR Code path:", dbError);
+          res.status(500).send(dbError.message);
+        }
       });
     });
   } catch (err) {
