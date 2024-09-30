@@ -14,7 +14,7 @@ const addItem = async (req, res) => {
       req.body.stock
     );
 
-    const qrData = `http://localhost:5000/items/s/${item.secretCode}`;
+    const qrData = `https://qrstok-api.my.id/items/s/${item.secretCode}`;
     const dir = path.join(__dirname, "../public/qrcodes");
 
     if (!fs.existsSync(dir)) {
