@@ -127,7 +127,6 @@ const getTotalStock = () => {
 module.exports = {
   addItem,
   getAllItems,
-  getItemById,
   getTotalStock,
   generateSecretCode,
   // updateItem,
