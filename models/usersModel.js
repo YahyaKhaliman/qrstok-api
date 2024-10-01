@@ -35,12 +35,10 @@ const addUser = async (username, password) => {
 
 const loginUser = async (username, password) => {
   return new Promise((resolve, reject) => {
-    // Mencari pengguna berdasarkan username
     const sql = "SELECT * FROM users WHERE username = ?";
     connection.query(sql, [username], async (err, results) => {
       if (err) return reject(err);
 
-      // Jika pengguna tidak ditemukan
       if (results.length === 0) {
         return reject(new Error("User not found"));
       }

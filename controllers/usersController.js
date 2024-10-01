@@ -29,7 +29,6 @@ const login = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Menangani login
     const user = await usersModel.loginUser(username, password);
 
     return res.status(200).json({
