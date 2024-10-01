@@ -2,7 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const itemRoutes = require("./routes/itemsRoute");
+const itemsRoutes = require("./routes/itemsRoute");
+const usersRoutes = require("./routes/usersRoute");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -11,7 +12,8 @@ app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 
-app.use(itemRoutes);
+app.use("/items", itemsRoutes);
+app.use(usersRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).json({
