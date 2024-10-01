@@ -7,11 +7,13 @@ const itemModel = require("../models/itemsModel");
 // Function to add item and generate QR Code
 const addItem = async (req, res) => {
   try {
-    console.log("Received data:", req.body);
-
-    // Generate a secret code and QR code path here
+    // Step 1: Generate the secret code
     const secretCode = itemModel.generateSecretCode();
+
+    // Step 2: Create the QR code data using the secret code
     const qrData = `https://qrstok-api.my.id/items/s/${secretCode}`;
+
+    // Directory for QR codes
     const dir = path.join(__dirname, "../public/qrcodes");
 
     // Ensure the directory exists
@@ -19,7 +21,7 @@ const addItem = async (req, res) => {
       fs.mkdirSync(dir);
     }
 
-    // Generate QR Code and save it as a file
+    // Step 3: Generate QR Code and save it as a file
     QRCode.toDataURL(qrData, async (err, url) => {
       if (err) {
         console.error("Error generating QR Code:", err);
@@ -27,7 +29,7 @@ const addItem = async (req, res) => {
       }
 
       const base64Data = url.replace(/^data:image\/png;base64,/, "");
-      const filePath = path.join(dir, `${secretCode}.png`);
+      const filePath = path.join(dir, `${secretCode}.png`); // File path using secretCode
 
       // Save the QR code file
       fs.writeFile(filePath, base64Data, "base64", async (err) => {
@@ -36,18 +38,19 @@ const addItem = async (req, res) => {
           return res.status(500).send(err.message);
         }
 
-        // Create a relative path for the QR code including 'public'
-        const relativePath = `public/qrcodes/${secretCode}.png`;
+        // Step 4: Create a relative path for the QR code
+        const relativePath = `public/qrcodes/${secretCode}.png`; // Relative path to return
 
-        // Now call the model to add the item with the relative QR code path
+        // Step 5: Call the model to add the item with the secret code and QR code path
         const itemResponse = await itemModel.addItem(
           req.body.name,
           req.body.type,
           req.body.stock,
+          secretCode, // Pass the generated secretCode
           relativePath // Pass the relative QR code file path
         );
 
-        // Send the response from the model
+        // Step 6: Send the response from the model
         res.status(201).json(itemResponse);
       });
     });

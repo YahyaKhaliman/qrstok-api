@@ -1,4 +1,3 @@
-const { stat } = require("fs");
 const connection = require("../config/db");
 
 // Fungsi untuk menghasilkan secretCode 9 digit
@@ -7,15 +6,14 @@ const generateSecretCode = () => {
 };
 
 // Fungsi untuk menambah item
-const addItem = (name, type, stock, qrCode) => {
-  const secretCode = generateSecretCode();
+const addItem = (name, type, stock, secretCode, qrCode) => {
   return new Promise((resolve, reject) => {
     const sql =
       "INSERT INTO items (name, type, stock, secretCode, qrCode) VALUES (?, ?, ?, ?, ?)";
 
     connection.query(
       sql,
-      [name, type, stock, secretCode, qrCode],
+      [name, type, stock, secretCode, qrCode], // Use the passed secretCode and qrCode
       (err, results) => {
         if (err) return reject(err);
 
@@ -28,7 +26,7 @@ const addItem = (name, type, stock, qrCode) => {
             type,
             stock,
             secretCode,
-            qrCode,
+            qrCode, // Ensure this matches the stored path
           },
         };
         resolve(formatResults);
