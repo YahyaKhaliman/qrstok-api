@@ -16,22 +16,28 @@ const addItem = (
   image
 ) => {
   return new Promise((resolve, reject) => {
-    if (
-      !name ||
-      !type ||
-      !stock ||
-      !secretCode ||
-      !qrCode ||
-      !size ||
-      !color ||
-      !price
-    ) {
-      const errorMessage = "All fields are required.";
+    if (!name || !type || !stock || !size || !color || !price || !image) {
+      const errorMessage =
+        "Fields 'name', 'type', 'stock', 'size', 'color', 'price', and 'image' are required.";
+      console.error(errorMessage);
       return reject(new Error(errorMessage));
     }
 
     if (isNaN(stock) || isNaN(price)) {
       const errorMessage = "Stock and price must be valid numbers.";
+      console.error(errorMessage);
+      return reject(new Error(errorMessage));
+    }
+
+    const validSizes = ["S", "M", "L", "XL", "XXL", "XXXL", "XXXXL"];
+
+    const upperCaseSize = size.toUpperCase();
+
+    if (!validSizes.includes(upperCaseSize)) {
+      const errorMessage = `Size must be one of the following: ${validSizes.join(
+        ", "
+      )}`;
+      console.error(errorMessage);
       return reject(new Error(errorMessage));
     }
 
@@ -40,9 +46,20 @@ const addItem = (
 
     connection.query(
       sql,
-      [name, type, stock, secretCode, qrCode, size, color, price, image],
+      [
+        name,
+        type,
+        stock,
+        secretCode,
+        qrCode,
+        upperCaseSize,
+        color,
+        price,
+        image,
+      ],
       (err, results) => {
         if (err) {
+          console.error("Error executing query:", err);
           return reject(err);
         }
 
@@ -56,7 +73,7 @@ const addItem = (
             stock,
             secretCode,
             qrCode,
-            size,
+            size: upperCaseSize,
             color,
             price,
             image,
@@ -95,7 +112,6 @@ const getAllItems = () => {
   });
 };
 
-// Fungsi untuk mendapatkan item berdasarkan ID
 const getItemBySecretCode = (secretCode) => {
   return new Promise((resolve, reject) => {
     const sql = "SELECT * FROM items WHERE secretCode = ?";
