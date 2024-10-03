@@ -54,8 +54,10 @@ const addItem = async (req, res) => {
 
     res.status(201).json(itemResponse);
   } catch (err) {
-    console.error("Error adding item:", err);
-    res.status(500).send({ error: "An error occurred while adding the item." });
+    res.status(500).send({
+      error: "An error occurred while adding the item.",
+      message: err.message,
+    });
   }
 };
 
@@ -75,7 +77,6 @@ const getItemBySecretCode = async (req, res) => {
 
     res.json(item);
   } catch (err) {
-    console.error("Error fetching item by secretCode:", err);
     res.status(500).send(err.message);
   }
 };

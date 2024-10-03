@@ -27,13 +27,11 @@ const addItem = (
       !price
     ) {
       const errorMessage = "All fields are required.";
-      console.error(errorMessage);
       return reject(new Error(errorMessage));
     }
 
     if (isNaN(stock) || isNaN(price)) {
       const errorMessage = "Stock and price must be valid numbers.";
-      console.error(errorMessage);
       return reject(new Error(errorMessage));
     }
 
@@ -45,7 +43,6 @@ const addItem = (
       [name, type, stock, secretCode, qrCode, size, color, price, image],
       (err, results) => {
         if (err) {
-          console.error("Error executing query:", err);
           return reject(err);
         }
 
