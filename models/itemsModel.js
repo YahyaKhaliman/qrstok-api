@@ -129,10 +129,10 @@ const getItemBySecretCode = (secretCode) => {
           stock: results[0].stock,
           secretCode: results[0].secretCode,
           qrCode: results[0].qrCode,
-          color: result[0].color,
-          size: result[0].size,
-          price: result[0].price,
-          image: result[0].image,
+          color: results[0].color,
+          size: results[0].size,
+          price: results[0].price,
+          image: results[0].image,
         },
       };
       resolve(item);
