@@ -1,66 +1,64 @@
-// controllers/itemsController.js
 const QRCode = require("qrcode");
 const fs = require("fs");
 const path = require("path");
 const itemModel = require("../models/itemsModel");
 
-// Function to add item and generate QR Code
 const addItem = async (req, res) => {
   try {
-    // Step 1: Generate the secret code
     const secretCode = itemModel.generateSecretCode();
+    const imageName = req.body.name.replace(/[^a-zA-Z0-9_-]/g, "_");
 
-    // Step 2: Create the QR code data using the secret code
     const qrData = `https://qrstok-api.my.id/items/s/${secretCode}`;
 
-    // Directory for QR codes
     const dir = path.join(__dirname, "../public/qrcodes");
+    const dirImage = path.join(__dirname, "../public/images");
 
-    // Ensure the directory exists
     if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir);
+      fs.mkdirSync(dir, { recursive: true });
     }
 
-    // Step 3: Generate QR Code and save it as a file
-    QRCode.toDataURL(qrData, async (err, url) => {
-      if (err) {
-        console.error("Error generating QR Code:", err);
-        return res.status(500).send(err.message);
-      }
+    if (!fs.existsSync(dirImage)) {
+      fs.mkdirSync(dirImage, { recursive: true });
+    }
 
-      const base64Data = url.replace(/^data:image\/png;base64,/, "");
-      const filePath = path.join(dir, `${secretCode}.png`); // File path using secretCode
+    const qrCodePath = path.join(dir, `${secretCode}.png`);
+    const qrOptions = {
+      type: "png",
+      quality: 0.92,
+      width: 500,
+      margin: 1,
+    };
 
-      // Save the QR code file
-      fs.writeFile(filePath, base64Data, "base64", async (err) => {
-        if (err) {
-          console.error("Error saving QR Code:", err);
-          return res.status(500).send(err.message);
-        }
+    await QRCode.toFile(qrCodePath, qrData, qrOptions);
 
-        // Step 4: Create a relative path for the QR code
-        const relativePath = `public/qrcodes/${secretCode}.png`; // Relative path to return
+    const relativeQrCodePath = `public/qrcodes/${secretCode}.png`;
 
-        // Step 5: Call the model to add the item with the secret code and QR code path
-        const itemResponse = await itemModel.addItem(
-          req.body.name,
-          req.body.type,
-          req.body.stock,
-          secretCode, // Pass the generated secretCode
-          relativePath // Pass the relative QR code file path
-        );
+    let imagePath = null;
+    if (req.file) {
+      imagePath = path.join(dirImage, `${imageName}.jpg`);
+      await fs.promises.copyFile(req.file.path, imagePath);
+      imagePath = `public/images/${imageName}.jpg`;
+    }
 
-        // Step 6: Send the response from the model
-        res.status(201).json(itemResponse);
-      });
-    });
+    const itemResponse = await itemModel.addItem(
+      req.body.name,
+      req.body.type,
+      req.body.stock,
+      secretCode,
+      relativeQrCodePath,
+      req.body.size,
+      req.body.color,
+      req.body.price,
+      imagePath
+    );
+
+    res.status(201).json(itemResponse);
   } catch (err) {
     console.error("Error adding item:", err);
-    res.status(500).send(err.message);
+    res.status(500).send({ error: "An error occurred while adding the item." });
   }
 };
 
-// Function to get all items
 const getAllItems = async (req, res) => {
   try {
     const items = await itemModel.getAllItems();
@@ -70,7 +68,6 @@ const getAllItems = async (req, res) => {
   }
 };
 
-// Function to get item by secret code
 const getItemBySecretCode = async (req, res) => {
   try {
     const item = await itemModel.getItemBySecretCode(req.params.secretCode);
@@ -83,7 +80,6 @@ const getItemBySecretCode = async (req, res) => {
   }
 };
 
-// Function to get total stock
 const getTotalStock = async (req, res) => {
   try {
     const totalStock = await itemModel.getTotalStock();

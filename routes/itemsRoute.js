@@ -1,17 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const itemsController = require("../controllers/itemsController");
+const upload = require("../middleware/multer");
 
-// Endpoint untuk menambah item
-router.post("", itemsController.addItem);
+// router.post("", itemsController.addItem);
+router.post("/", upload.single("image"), itemsController.addItem);
 
-// Endpoint untuk mendapatkan semua item
-router.get("", itemsController.getAllItems);
+router.get("/", itemsController.getAllItems);
 
-// Endpoint untuk mendapatkan item berdasarkan secretCode
 router.get("/s/:secretCode", itemsController.getItemBySecretCode);
 
-// Endpoint untuk mendapatkan total stock
 router.get("/total-stock", itemsController.getTotalStock);
 
 // router.put("/items/:id", itemsController.updateItem);

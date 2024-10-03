@@ -1,21 +1,32 @@
 const connection = require("../config/db");
 
-// Fungsi untuk menghasilkan secretCode 9 digit
 const generateSecretCode = () => {
-  return Math.floor(100000000 + Math.random() * 900000000).toString(); // Menghasilkan angka 9 digit
+  return Math.floor(100000000 + Math.random() * 900000000).toString();
 };
 
-// Fungsi untuk menambah item
-const addItem = (name, type, stock, secretCode, qrCode) => {
+const addItem = (
+  name,
+  type,
+  stock,
+  secretCode,
+  qrCode,
+  size,
+  color,
+  price,
+  image
+) => {
   return new Promise((resolve, reject) => {
     const sql =
-      "INSERT INTO items (name, type, stock, secretCode, qrCode) VALUES (?, ?, ?, ?, ?)";
+      "INSERT INTO items (name, type, stock, secretCode, qrCode, size, color, price, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     connection.query(
       sql,
-      [name, type, stock, secretCode, qrCode], // Use the passed secretCode and qrCode
+      [name, type, stock, secretCode, qrCode, size, color, price, image],
       (err, results) => {
-        if (err) return reject(err);
+        if (err) {
+          console.error("Error executing query:", err);
+          return reject(err);
+        }
 
         const formatResults = {
           status: "success",
@@ -26,7 +37,11 @@ const addItem = (name, type, stock, secretCode, qrCode) => {
             type,
             stock,
             secretCode,
-            qrCode, // Ensure this matches the stored path
+            qrCode,
+            size,
+            color,
+            price,
+            image,
           },
         };
         resolve(formatResults);
@@ -35,7 +50,6 @@ const addItem = (name, type, stock, secretCode, qrCode) => {
   });
 };
 
-// Fungsi untuk mendapatkan semua item
 const getAllItems = () => {
   return new Promise((resolve, reject) => {
     const sql = "SELECT * FROM items";
@@ -52,6 +66,10 @@ const getAllItems = () => {
           stock: item.stock,
           secretCode: item.secretCode,
           qrCode: item.qrCode,
+          color: item.color,
+          size: item.size,
+          price: item.price,
+          image: item.image,
         })),
       };
       resolve(formatResults);
@@ -77,6 +95,10 @@ const getItemBySecretCode = (secretCode) => {
           stock: results[0].stock,
           secretCode: results[0].secretCode,
           qrCode: results[0].qrCode,
+          color: result[0].color,
+          size: result[0].size,
+          price: result[0].price,
+          image: result[0].image,
         },
       };
       resolve(item);
