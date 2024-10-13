@@ -30,7 +30,6 @@ const addItem = (
     }
 
     const validSizes = ["S", "M", "L", "XL", "XXL", "XXXL", "XXXXL"];
-
     const upperCaseSize = size.toUpperCase();
 
     if (!validSizes.includes(upperCaseSize)) {
@@ -63,7 +62,7 @@ const addItem = (
           return reject(err);
         }
 
-        const formatResults = {
+        const formattedResult = {
           status: "success",
           message: "Item added successfully",
           data: {
@@ -79,7 +78,7 @@ const addItem = (
             image,
           },
         };
-        resolve(formatResults);
+        resolve(formattedResult);
       }
     );
   });
@@ -91,9 +90,17 @@ const getAllItems = () => {
     connection.query(sql, (err, results) => {
       if (err) return reject(err);
 
-      const formatResults = {
+      if (results.length === 0) {
+        return resolve({
+          status: "error",
+          message: "Item not found",
+          data: null,
+        });
+      }
+
+      const formattedResults = {
         status: "success",
-        message: "list all items",
+        message: "List of all items",
         data: results.map((item) => ({
           id: item.id,
           name: item.name,
@@ -107,7 +114,7 @@ const getAllItems = () => {
           image: item.image,
         })),
       };
-      resolve(formatResults);
+      resolve(formattedResults);
     });
   });
 };
@@ -117,7 +124,14 @@ const getItemBySecretCode = (secretCode) => {
     const sql = "SELECT * FROM items WHERE secretCode = ?";
     connection.query(sql, [secretCode], (err, results) => {
       if (err) return reject(err);
-      if (results.length === 0) return resolve(null);
+
+      if (results.length === 0) {
+        return resolve({
+          status: "error",
+          message: "Item not found",
+          data: null,
+        });
+      }
 
       const item = {
         status: "success",
@@ -145,7 +159,79 @@ const getTotalStock = () => {
     const sql = "SELECT SUM(stock) AS totalStock FROM items";
     connection.query(sql, (err, results) => {
       if (err) return reject(err);
-      resolve(results[0].totalStock);
+
+      if (results.length === 0) {
+        return resolve({
+          status: "error",
+          message: "Total stock not found",
+          data: null,
+        });
+      }
+
+      resolve({
+        status: "success",
+        message: "Total stock",
+        data: results[0].totalStock,
+      });
+    });
+  });
+};
+
+const getAllType = () => {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT DISTINCT type FROM items";
+    connection.query(sql, (err, results) => {
+      if (err) return reject(err);
+
+      if (results.length === 0) {
+        return resolve({
+          status: "error",
+          message: "No types found",
+          data: null,
+        });
+      }
+
+      const types = results.map((row) => row.type);
+      resolve({
+        status: "success",
+        message: "List all category",
+        data: types,
+      });
+    });
+  });
+};
+
+const getItemByType = (type) => {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT * FROM items WHERE type = ?";
+    connection.query(sql, [type], (err, results) => {
+      if (err) return reject(err);
+
+      if (results.length === 0) {
+        return resolve({
+          status: "error",
+          message: `No items found for : ${type}`,
+          data: null,
+        });
+      }
+
+      const formattedResults = {
+        status: "success",
+        message: `${results.length} item(s) found for category: ${type}`,
+        data: results.map((item) => ({
+          id: item.id,
+          name: item.name,
+          type: item.type,
+          stock: item.stock,
+          secretCode: item.secretCode,
+          qrCode: item.qrCode,
+          color: item.color,
+          size: item.size,
+          price: item.price,
+          image: item.image,
+        })),
+      };
+      resolve(formattedResults);
     });
   });
 };
@@ -183,6 +269,8 @@ module.exports = {
   getAllItems,
   getTotalStock,
   generateSecretCode,
+  getAllType,
+  getItemByType,
   // updateItem,
   // deleteItem,
   getItemBySecretCode,

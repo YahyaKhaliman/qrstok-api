@@ -11,6 +11,10 @@ router.get("/s/:secretCode", itemsController.getItemBySecretCode);
 
 router.get("/total-stock", itemsController.getTotalStock);
 
+router.get("/type", itemsController.getAllType);
+
+router.get("/type/:type", itemsController.getItemByType);
+
 // router.put("/items/:id", itemsController.updateItem);
 // router.delete("/items/:id", itemsController.deleteItem);
 
