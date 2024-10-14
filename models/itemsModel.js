@@ -13,12 +13,22 @@ const addItem = (
   size,
   color,
   price,
-  image
+  image,
+  description
 ) => {
   return new Promise((resolve, reject) => {
-    if (!name || !type || !stock || !size || !color || !price || !image) {
+    if (
+      !name ||
+      !type ||
+      !stock ||
+      !size ||
+      !color ||
+      !price ||
+      !image ||
+      description
+    ) {
       const errorMessage =
-        "Fields 'name', 'type', 'stock', 'size', 'color', 'price', and 'image' are required.";
+        "Fields 'name', 'type', 'stock', 'size', 'color', 'price', 'image', and 'description' are required.";
       console.error(errorMessage);
       return reject(new Error(errorMessage));
     }
@@ -41,7 +51,7 @@ const addItem = (
     }
 
     const sql =
-      "INSERT INTO items (name, type, stock, secretCode, qrCode, size, color, price, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+      "INSERT INTO items (name, type, stock, secretCode, qrCode, size, color, price, image, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     connection.query(
       sql,
@@ -55,6 +65,7 @@ const addItem = (
         color,
         price,
         image,
+        description,
       ],
       (err, results) => {
         if (err) {
@@ -76,6 +87,7 @@ const addItem = (
             color,
             price,
             image,
+            description,
           },
         };
         resolve(formattedResult);
@@ -112,6 +124,7 @@ const getAllItems = () => {
           size: item.size,
           price: item.price,
           image: item.image,
+          description: item.description,
         })),
       };
       resolve(formattedResults);
@@ -147,6 +160,7 @@ const getItemBySecretCode = (secretCode) => {
           size: results[0].size,
           price: results[0].price,
           image: results[0].image,
+          description: results[0].description,
         },
       };
       resolve(item);
@@ -229,6 +243,7 @@ const getItemByType = (type) => {
           size: item.size,
           price: item.price,
           image: item.image,
+          description: item.description,
         })),
       };
       resolve(formattedResults);

@@ -48,7 +48,8 @@ const addItem = async (req, res) => {
       req.body.size,
       req.body.color,
       req.body.price,
-      imagePath
+      imagePath,
+      req.body.description
     );
 
     res.status(201).json(itemResponse);
