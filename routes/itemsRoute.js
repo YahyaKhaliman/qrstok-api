@@ -15,7 +15,8 @@ router.get("/type", itemsController.getAllType);
 
 router.get("/type/:type", itemsController.getItemByType);
 
-// router.put("/items/:id", itemsController.updateItem);
-// router.delete("/items/:id", itemsController.deleteItem);
+router.put("/:secretCode", upload.single("image"), itemsController.updateItem);
+
+router.delete("/:id", itemsController.deleteItem);
 
 module.exports = router;

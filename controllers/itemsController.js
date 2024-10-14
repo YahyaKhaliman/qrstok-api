@@ -112,11 +112,75 @@ const getAllType = async (req, res) => {
 
 const getItemByType = async (req, res) => {
   try {
-    const itemByType = await itemModel.getItemByType(req.params.type); // Melewatkan type
+    const itemByType = await itemModel.getItemByType(req.params.type);
     if (itemByType.status === "error") {
       return res.status(404).json(itemByType);
     }
     res.json(itemByType);
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
+
+const updateItem = async (req, res) => {
+  console.log(req.body);
+  try {
+    const secretCode = req.params.secretCode;
+    const oldItem = await itemModel.getItemBySecretCode(secretCode);
+
+    if (oldItem.status === "error") {
+      return res.status(404).json(oldItem);
+    }
+
+    const { name, type, stock, size, color, price, description } = req.body;
+
+    const stockValue = parseFloat(stock);
+    const priceValue = parseFloat(price);
+
+    if (isNaN(stockValue) || isNaN(priceValue)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Stock and price must be valid numbers.",
+      });
+    }
+
+    const imageName = req.file
+      ? `public/images/${req.file.filename}`
+      : oldItem.data.image;
+
+    const itemUpdate = await itemModel.updateItem(
+      oldItem.data.id,
+      name,
+      type,
+      stockValue,
+      oldItem.data.secretCode,
+      oldItem.data.qrCode,
+      size,
+      color,
+      priceValue,
+      imageName,
+      description
+    );
+
+    if (itemUpdate.status === "error") {
+      return res.status(404).json(itemUpdate);
+    }
+
+    res.json(itemUpdate);
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
+
+const deleteItem = async (req, res) => {
+  try {
+    const itemId = req.params.id;
+    const result = await itemModel.deleteItem(itemId);
+
+    if (result.status === "error") {
+      return res.status(404).json(result);
+    }
+    res.json(result);
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
   }
@@ -129,4 +193,6 @@ module.exports = {
   getItemBySecretCode,
   getAllType,
   getItemByType,
+  updateItem,
+  deleteItem,
 };

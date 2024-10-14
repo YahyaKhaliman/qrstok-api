@@ -39,7 +39,7 @@ const login = async (req, res) => {
     console.log(error);
     return res.status(400).json({
       message: "Login Error",
-      error: error.message, // Kirimkan pesan kesalahan yang tepat
+      error: error.message,
     });
   }
 };

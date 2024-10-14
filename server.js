@@ -12,7 +12,9 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(logs);
+
 app.use("/items", itemsRoutes);
 app.use(usersRoutes);
 
@@ -23,8 +25,11 @@ app.get("/", (req, res) => {
   });
 });
 
+app.use((req, res) => {
+  res.status(404).json({ message: "Not Found" });
+});
+
 app.use((err, req, res, next) => {
-  console.error(err.stack);
   res.status(500).json({ message: err.message });
 });
 
