@@ -25,11 +25,10 @@ const addItem = (
       !color ||
       !price ||
       !image ||
-      description
+      !description
     ) {
       const errorMessage =
         "Fields 'name', 'type', 'stock', 'size', 'color', 'price', 'image', and 'description' are required.";
-      console.error(errorMessage);
       return reject(new Error(errorMessage));
     }
 
